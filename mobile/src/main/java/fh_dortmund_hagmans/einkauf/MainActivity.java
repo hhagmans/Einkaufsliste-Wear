@@ -5,12 +5,29 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks{
+
+    GoogleApiClient mApiClient;
+
+    private static final String INIT_LIST = "/init_list";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mApiClient = new GoogleApiClient.Builder( this )
+                .addApi( Wearable.API )
+                .build();
+
+        mApiClient.connect();
+
         setContentView(R.layout.activity_main);
     }
 
@@ -35,5 +52,34 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mApiClient.disconnect();
+    }
+
+    private void sendMessage( final String path, final String text ) {
+        new Thread( new Runnable() {
+            @Override
+            public void run() {
+                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes( mApiClient ).await();
+                for(Node node : nodes.getNodes()) {
+                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                            mApiClient, node.getId(), path, text.getBytes() ).await();
+                }
+
+            }
+        }).start();
     }
 }

@@ -62,4 +62,8 @@ public class ShoppingListAdapter extends WearableListView.Adapter {
     public int getItemCount() {
         return mDataset.length;
     }
+
+    public void setmDataset(String[] dataset) {
+        this.mDataset = dataset;
+    }
 }
