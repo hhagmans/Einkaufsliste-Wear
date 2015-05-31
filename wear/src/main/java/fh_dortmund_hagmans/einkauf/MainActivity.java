@@ -20,6 +20,8 @@ import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import fh_dortmund_hagmans.einkauf.models.Article;
@@ -28,7 +30,7 @@ import fh_dortmund_hagmans.einkauf.models.ShoppingList;
 public class MainActivity extends Activity implements WearableListView.ClickListener, GoogleApiClient.ConnectionCallbacks, MessageApi.MessageListener{
 
     // Sample dataset for the list
-    String[] elements = { "Keine aktuelle Liste vorhanden"};
+    String[] elements = { "Lädt aktuelle Liste..."};
     GoogleApiClient mApiClient;
     ShoppingListAdapter adapter;
     private static final String INIT_LIST = "/init_list";
@@ -56,6 +58,12 @@ protected void onCreate(Bundle savedInstanceState) {
 
     mApiClient.connect();
     Wearable.MessageApi.addListener(mApiClient, this);
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            sendMessage(INIT_LIST, "");
+        }
+    }).start();
 }
 
 // WearableListView click listener
@@ -97,20 +105,26 @@ public void onTopEmptyRegionClick() {
             byte[] payload = messageEvent.getData();
             String jsonString = new String(payload);
             Log.v("TEST", jsonString);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode json = null;
-            ShoppingList list = null;
-            try {
-                list = mapper.readValue(jsonString, ShoppingList.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            String[] articleArray;
+            if (jsonString == null || jsonString == "") {
+                articleArray = new String[1];
+                articleArray[0] = "Keine aktuelle Liste vorhanden. Klicken um nochmal zu laden.";
+            } else {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode json = null;
+                Article[] list = null;
+                try {
+                    list = mapper.readValue(jsonString, Article[].class);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-            final String[] articleArray = new String[list.getArticles().size()];
-            int i = 0;
-            for (Article article: list.getArticles()) {
-                articleArray[i] = article.getName();
-                i++;
+                articleArray = new String[list.length];
+                int i = 0;
+                for (Article article : list) {
+                    articleArray[i] = article.getName();
+                    i++;
+                }
             }
             final String[] viewArray = articleArray;
             runOnUiThread(new Runnable() {
@@ -122,7 +136,7 @@ public void onTopEmptyRegionClick() {
                     adapter.setmDataset(viewArray);
                     adapter.notifyDataSetChanged();
                 }
-        });
+            });
 
 
         }
