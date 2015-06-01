@@ -1,22 +1,25 @@
 package fh_dortmund_hagmans.einkauf;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.support.wearable.view.WearableListView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import fh_dortmund_hagmans.einkauf.models.Article;
+
 /**
  * Created by hendrikh on 17.04.15.
  */
 public class ShoppingListAdapter extends WearableListView.Adapter {
-    private String[] mDataset;
+    private Article[] mDataset;
     private final Context mContext;
     private final LayoutInflater mInflater;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ShoppingListAdapter(Context context, String[] dataset) {
+    public ShoppingListAdapter(Context context, Article[] dataset) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mDataset = dataset;
@@ -51,9 +54,14 @@ public class ShoppingListAdapter extends WearableListView.Adapter {
         ItemViewHolder itemHolder = (ItemViewHolder) holder;
         TextView view = itemHolder.textView;
         // replace text contents
-        view.setText(mDataset[position]);
+        view.setText(mDataset[position].getName());
         // replace list item's metadata
-        holder.itemView.setTag(position);
+        holder.itemView.setTag(mDataset[position].getId());
+        if (mDataset[position].isChecked()) {
+            view.setPaintFlags(view.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        } else {
+            view.setPaintFlags(view.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        }
     }
 
     // Return the size of your dataset
@@ -63,7 +71,11 @@ public class ShoppingListAdapter extends WearableListView.Adapter {
         return mDataset.length;
     }
 
-    public void setmDataset(String[] dataset) {
+    public void setmDataset(Article[] dataset) {
         this.mDataset = dataset;
+    }
+
+    public Article[] getmDataset() {
+        return this.mDataset;
     }
 }

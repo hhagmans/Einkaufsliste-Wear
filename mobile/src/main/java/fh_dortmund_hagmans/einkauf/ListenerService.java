@@ -19,6 +19,7 @@ import com.google.android.gms.wearable.WearableListenerService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
@@ -29,38 +30,12 @@ import java.util.concurrent.TimeUnit;
 public class ListenerService extends WearableListenerService implements GoogleApiClient.ConnectionCallbacks{
 
     private static final String INIT_LIST = "/init_list";
+    private static final String CHECK_ARTICLE = "/check_article";
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.v("TESTMOBILE", "Message Received");
         if( messageEvent.getPath().equalsIgnoreCase( INIT_LIST ) ) {
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
-                            .setContentTitle("My notification")
-                            .setContentText("Hello World!");
-// Creates an explicit intent for an Activity in your app
-            Intent resultIntent = new Intent(this, MainActivity.class);
-
-// The stack builder object will contain an artificial back stack for the
-// started Activity.
-// This ensures that navigating backward from the Activity leads out of
-// your application to the Home screen.
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-// Adds the back stack for the Intent (but not the Intent itself)
-            stackBuilder.addParentStack(MainActivity.class);
-// Adds the Intent that starts the Activity to the top of the stack
-            stackBuilder.addNextIntent(resultIntent);
-            PendingIntent resultPendingIntent =
-                    stackBuilder.getPendingIntent(
-                            0,
-                            PendingIntent.FLAG_UPDATE_CURRENT
-                    );
-            mBuilder.setContentIntent(resultPendingIntent);
-            NotificationManager mNotificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-// mId allows you to update the notification later on.
-            int mId = 0;
-            mNotificationManager.notify(mId, mBuilder.build());
             String nodeId = messageEvent.getSourceNodeId();
 
             BufferedReader in = null;
@@ -79,13 +54,36 @@ public class ListenerService extends WearableListenerService implements GoogleAp
                 e.printStackTrace();
             }
 
-            sendMessage(INIT_LIST, json, nodeId);
-        } else {
+            sendMessage(INIT_LIST, json);
+        } else if (messageEvent.getPath().equalsIgnoreCase( CHECK_ARTICLE )) {
+            String payload = new String(messageEvent.getData());
+            String[] splitPayload = payload.split(",");
+            String id = splitPayload[0];
+            boolean checked = Boolean.valueOf(splitPayload[1]);
+            try {
+                URL url = null;
+                if (checked) {
+                    url = new URL("https://einkauf.herokuapp.com/article&id=" + id + "/uncheck");
+                }
+                else {
+                    url = new URL("https://einkauf.herokuapp.com/article&id=" + id + "/check");
+                }
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(url.openStream()));
+                in.readLine();
+                in.close();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else
+        {
             super.onMessageReceived(messageEvent);
         }
     }
 
-    private void sendMessage(String path, String message, String nodeId) {
+    private void sendMessage(String path, String message) {
         Log.v("TESTMOBILE", "Try sending message");
         Log.v("TESTMOBILE", message);
         GoogleApiClient client = new GoogleApiClient.Builder(this)

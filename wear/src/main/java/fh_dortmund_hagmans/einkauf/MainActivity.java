@@ -1,6 +1,7 @@
 package fh_dortmund_hagmans.einkauf;
 
 import android.app.Activity;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.support.wearable.view.WearableListView;
@@ -20,20 +21,24 @@ import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import fh_dortmund_hagmans.einkauf.models.Article;
+import fh_dortmund_hagmans.einkauf.models.Category;
 import fh_dortmund_hagmans.einkauf.models.ShoppingList;
 
 public class MainActivity extends Activity implements WearableListView.ClickListener, GoogleApiClient.ConnectionCallbacks, MessageApi.MessageListener{
 
     // Sample dataset for the list
-    String[] elements = { "Lädt aktuelle Liste..."};
+    Article[] elements = { new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
     GoogleApiClient mApiClient;
     ShoppingListAdapter adapter;
     private static final String INIT_LIST = "/init_list";
+    private static final String CHECK_ARTICLE = "/check_article";
 
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -66,18 +71,107 @@ protected void onCreate(Bundle savedInstanceState) {
     }).start();
 }
 
-// WearableListView click listener
 @Override
-public void onClick(WearableListView.ViewHolder v) {
-        Integer tag = (Integer) v.itemView.getTag();
+public void onResume() {
+    super.onResume();
+    final Article[] elements = { new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+    runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+            WearableListView listView =
+                    (WearableListView) findViewById(R.id.wearable_list);
+            // Assign an adapter to the list
+            adapter.setmDataset(elements);
+            adapter.notifyDataSetChanged();
+        }
+    });
     new Thread(new Runnable() {
         @Override
         public void run() {
             sendMessage(INIT_LIST, "");
         }
     }).start();
-        // use this data to complete some action ...
-        }
+}
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        final Article[] elements = { new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WearableListView listView =
+                        (WearableListView) findViewById(R.id.wearable_list);
+                // Assign an adapter to the list
+                adapter.setmDataset(elements);
+                adapter.notifyDataSetChanged();
+            }
+        });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(INIT_LIST, "");
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        final Article[] elements = { new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WearableListView listView =
+                        (WearableListView) findViewById(R.id.wearable_list);
+                // Assign an adapter to the list
+                adapter.setmDataset(elements);
+                adapter.notifyDataSetChanged();
+            }
+        });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(INIT_LIST, "");
+            }
+        }).start();
+    }
+
+// WearableListView click listener
+@Override
+public void onClick(WearableListView.ViewHolder v) {
+    final Integer tag = (Integer) v.itemView.getTag();
+    final Integer position = (Integer) v.getPosition();
+    if (tag.equals(0)) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(INIT_LIST, "");
+            }
+        }).start();
+    } else {
+        Article[] dataset = adapter.getmDataset();
+        final boolean checked = dataset[position].isChecked();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WearableListView listView =
+                        (WearableListView) findViewById(R.id.wearable_list);
+                // Assign an adapter to the list
+                Article[] dataset = adapter.getmDataset();
+                dataset[position].toggleArticle();
+                adapter.setmDataset(dataset);
+                adapter.notifyDataSetChanged();
+            }
+        });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(CHECK_ARTICLE, tag.toString() + "," + checked);
+            }
+        }).start();
+    }
+}
 
 @Override
 public void onTopEmptyRegionClick() {
@@ -104,29 +198,18 @@ public void onTopEmptyRegionClick() {
         if( messageEvent.getPath().equalsIgnoreCase( INIT_LIST ) ) {
             byte[] payload = messageEvent.getData();
             String jsonString = new String(payload);
-            Log.v("TEST", jsonString);
-            String[] articleArray;
-            if (jsonString == null || jsonString == "") {
-                articleArray = new String[1];
-                articleArray[0] = "Keine aktuelle Liste vorhanden. Klicken um nochmal zu laden.";
-            } else {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode json = null;
-                Article[] list = null;
-                try {
-                    list = mapper.readValue(jsonString, Article[].class);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            Article[] articleArray = null;
 
-                articleArray = new String[list.length];
-                int i = 0;
-                for (Article article : list) {
-                    articleArray[i] = article.getName();
-                    i++;
-                }
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode json = null;
+            try {
+                articleArray = mapper.readValue(jsonString, Article[].class);
+            } catch (IOException e) {
+                articleArray = new Article[1];
+                articleArray[0] = new Article("Keine aktuelle Liste vorhanden. Klicken um nochmal zu laden.", Category.FLEISCHFISCH, 0);
             }
-            final String[] viewArray = articleArray;
+
+            final Article[] viewArray = articleArray;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -146,8 +229,11 @@ public void onTopEmptyRegionClick() {
         mApiClient.blockingConnect(100, TimeUnit.MILLISECONDS);
         NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes( mApiClient ).await();
         for(Node node : nodes.getNodes()) {
-            Log.v("TEST", node.getDisplayName());
-            Wearable.MessageApi.sendMessage(mApiClient, node.getId(), message, null);
+            if (payload == null) {
+                Wearable.MessageApi.sendMessage(mApiClient, node.getId(), message, null);
+            } else {
+                Wearable.MessageApi.sendMessage(mApiClient, node.getId(), message, payload.getBytes());
+            }
         }
     }
 }
