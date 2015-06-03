@@ -1,6 +1,8 @@
 package fh_dortmund_hagmans.einkauf;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -364,6 +366,17 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         loginStatusText.setText("Nicht eingeloggt");
         logoutButton.setVisibility(View.INVISIBLE);
+    }
+
+    public void openRegister(View view) {
+        String url = null;
+        url = getString(R.string.server_url) + "register";
+
+        if (!url.startsWith("https://") && !url.startsWith("http://")){
+            url = "http://" + url;
+        }
+        Intent openUrlIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(openUrlIntent);
     }
 
     @Override

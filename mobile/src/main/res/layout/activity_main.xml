@@ -58,14 +58,13 @@
         android:hint="Passwort"
         android:inputType="textPassword" />
 
-
     <Button
         android:id="@+id/loginBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/passwordET"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="94dp"
+        android:layout_marginTop="30dp"
         android:onClick="authenticateLogin"
         android:text="Login" />
 
@@ -75,7 +74,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/passwordET"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="94dp"
+        android:layout_marginTop="30dp"
         android:onClick="logOut"
         android:visibility="invisible"
         android:text="Logout" />
@@ -90,5 +89,14 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Nicht eingeloggt" />
 
+    <Button
+        android:id="@+id/registerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/loginStatus"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="54dp"
+        android:onClick="openRegister"
+        android:text="Zur Registrierung" />
 
 </RelativeLayout>
