@@ -39,6 +39,8 @@ public class MainActivity extends Activity implements WearableListView.ClickList
     ShoppingListAdapter adapter;
     private static final String INIT_LIST = "/init_list";
     private static final String CHECK_ARTICLE = "/check_article";
+    private static final String SEND_USER = "/send_user";
+    private static final String LOGOUT_USER = "/logout_user";
 
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -69,72 +71,76 @@ protected void onCreate(Bundle savedInstanceState) {
             sendMessage(INIT_LIST, "");
         }
     }).start();
+
 }
 
 @Override
 public void onResume() {
-    super.onResume();
-    final Article[] elements = { new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
-    runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-            WearableListView listView =
-                    (WearableListView) findViewById(R.id.wearable_list);
-            // Assign an adapter to the list
-            adapter.setmDataset(elements);
-            adapter.notifyDataSetChanged();
-        }
-    });
-    new Thread(new Runnable() {
-        @Override
-        public void run() {
-            sendMessage(INIT_LIST, "");
-        }
-    }).start();
-}
+        super.onResume();
+            final Article[] elements = {new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    WearableListView listView =
+                            (WearableListView) findViewById(R.id.wearable_list);
+                    // Assign an adapter to the list
+                    adapter.setmDataset(elements);
+                    adapter.notifyDataSetChanged();
+                }
+            });
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessage(INIT_LIST, "");
+                }
+            }).start();
+
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        final Article[] elements = { new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                WearableListView listView =
-                        (WearableListView) findViewById(R.id.wearable_list);
-                // Assign an adapter to the list
-                adapter.setmDataset(elements);
-                adapter.notifyDataSetChanged();
-            }
-        });
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                sendMessage(INIT_LIST, "");
-            }
-        }).start();
+            final Article[] elements = {new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    WearableListView listView =
+                            (WearableListView) findViewById(R.id.wearable_list);
+                    // Assign an adapter to the list
+                    adapter.setmDataset(elements);
+                    adapter.notifyDataSetChanged();
+                }
+            });
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessage(INIT_LIST, "");
+                }
+            }).start();
+
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        final Article[] elements = { new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                WearableListView listView =
-                        (WearableListView) findViewById(R.id.wearable_list);
-                // Assign an adapter to the list
-                adapter.setmDataset(elements);
-                adapter.notifyDataSetChanged();
-            }
-        });
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                sendMessage(INIT_LIST, "");
-            }
-        }).start();
+            final Article[] elements = {new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    WearableListView listView =
+                            (WearableListView) findViewById(R.id.wearable_list);
+                    // Assign an adapter to the list
+                    adapter.setmDataset(elements);
+                    adapter.notifyDataSetChanged();
+                }
+            });
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessage(INIT_LIST, "");
+                }
+            }).start();
+
     }
 
 // WearableListView click listener

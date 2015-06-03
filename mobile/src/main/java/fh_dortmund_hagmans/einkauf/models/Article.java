@@ -19,6 +19,12 @@ public class Article {
         this.category = category;
     }
 
+    public Article(String name, Category category, int id) {
+        this.name = name;
+        this.category = category;
+        this.id = id;
+    }
+
     public int getId() {
         return id;
     }
@@ -49,5 +55,12 @@ public class Article {
 
     public void uncheckArticle() {
         this.checked = false;
+    }
+
+    public void toggleArticle() {
+        if (this.checked)
+            this.uncheckArticle();
+        else
+            this.checkArticle();
     }
 }
