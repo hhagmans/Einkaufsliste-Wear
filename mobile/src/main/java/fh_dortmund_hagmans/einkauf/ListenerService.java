@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import fh_dortmund_hagmans.einkauf.models.Article;
 import fh_dortmund_hagmans.einkauf.models.Category;
+import fh_dortmund_hagmans.einkauf.models.User;
 
 /**
  * Created by hendrikh on 24.04.15.
@@ -51,23 +52,59 @@ public class ListenerService extends WearableListenerService implements GoogleAp
 
             if (username != null) {
 
-                BufferedReader in = null;
-                String inputLine = "";
-                String json = "";
+                String answer = null;
+                URL url = null;
                 try {
-                    URL url = new URL(getString(R.string.server_url) + "shoppingList/current/json&username=" + username + "&password=" + password);
-
+                    url = new URL(getString(R.string.server_url) + "login&name=" + username + "&password=" + password + "/check");
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                BufferedReader in = null;
+                try {
                     in = new BufferedReader(
                             new InputStreamReader(url.openStream()));
-
-                    while ((inputLine = in.readLine()) != null)
-                        json += inputLine;
+                    answer = in.readLine();
                     in.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                sendMessage(INIT_LIST, json);
+
+                if (answer == null || answer.equals("true") == false) {
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.remove("username");
+                    editor.remove("password");
+
+                    editor.commit();
+
+                    Article[] elements = {new Article("Bitte erst auf Smartphone anmelden", Category.FLEISCHFISCH, 0)};
+                    ObjectMapper mapper = new ObjectMapper();
+                    String json = "";
+                    try {
+                        json = mapper.writeValueAsString(elements);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                    sendMessage(INIT_LIST, json);
+                } else {
+
+                    String inputLine = "";
+                    String json = "";
+                    try {
+                        url = new URL(getString(R.string.server_url) + "shoppingList/current/json&username=" + username + "&password=" + password);
+
+                        in = new BufferedReader(
+                                new InputStreamReader(url.openStream()));
+
+                        while ((inputLine = in.readLine()) != null)
+                            json += inputLine;
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    sendMessage(INIT_LIST, json);
+                }
             } else {
                 Article[] elements = {new Article("Bitte erst auf Smartphone anmelden", Category.FLEISCHFISCH, 0)};
                 ObjectMapper mapper = new ObjectMapper();
@@ -91,14 +128,48 @@ public class ListenerService extends WearableListenerService implements GoogleAp
             String password = settings.getString("password", null);
 
             if (username != null) {
+                String answer = null;
+                URL url = null;
                 try {
-                    URL url = null;
+                    url = new URL(getString(R.string.server_url) + "login&name=" + username + "&password=" + password + "/check");
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                BufferedReader in = null;
+                try {
+                    in = new BufferedReader(
+                            new InputStreamReader(url.openStream()));
+                    answer = in.readLine();
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+                if (answer == null || answer.equals("true") == false) {
+                SharedPreferences.Editor editor = settings.edit();
+                editor.remove("username");
+                editor.remove("password");
+
+                editor.commit();
+
+                Article[] elements = {new Article("Bitte erst auf Smartphone anmelden", Category.FLEISCHFISCH, 0)};
+                ObjectMapper mapper = new ObjectMapper();
+                String json = "";
+                try {
+                    json = mapper.writeValueAsString(elements);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                sendMessage(INIT_LIST, json);
+            } else {
+                try {
                     if (checked) {
                         url = new URL(getString(R.string.server_url) + "article&id=" + id + "/uncheck&username=" + username + "&password=" + password);
                     } else {
                         url = new URL(getString(R.string.server_url) + "article&id=" + id + "/check&username=" + username + "&password=" + password);
                     }
-                    BufferedReader in = new BufferedReader(
+                    in = new BufferedReader(
                             new InputStreamReader(url.openStream()));
                     in.readLine();
                     in.close();
@@ -107,6 +178,7 @@ public class ListenerService extends WearableListenerService implements GoogleAp
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
             }
         } else
         {

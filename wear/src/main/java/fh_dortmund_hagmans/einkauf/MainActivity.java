@@ -3,6 +3,7 @@ package fh_dortmund_hagmans.einkauf;
 import android.app.Activity;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
 import android.support.wearable.view.WearableListView;
 import android.util.Log;
@@ -227,7 +228,8 @@ public void onTopEmptyRegionClick() {
                 }
             });
 
-
+            Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+            vibrator.vibrate(100);
         }
     }
 

@@ -33,6 +33,19 @@
         </intent-filter>
     </service>
 
+        <receiver android:name=".GcmRegistrationUpdateReceiver" >
+            <intent-filter>
+                <action android:name="FRUITY_TOKEN_NEEDS_UPDATE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".GcmMessageReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="fh_dortmund_hagmans.einkauf" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

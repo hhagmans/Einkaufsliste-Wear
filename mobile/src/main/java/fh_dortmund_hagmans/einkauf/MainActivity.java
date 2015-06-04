@@ -241,6 +241,44 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         });
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Log.d("MainActivity", "onNewIntent is called!");
+
+        String message = intent.getStringExtra("message");
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        String username = settings.getString("username", null);
+        String password = settings.getString("password", null);
+
+        if (username != null) {
+
+            String answer = null;
+            URL url = null;
+            try {
+                url = new URL(getString(R.string.server_url) + "login&name=" + username + "&password=" + password + "/check");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            BufferedReader in = null;
+            try {
+                in = new BufferedReader(
+                        new InputStreamReader(url.openStream()));
+                answer = in.readLine();
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            if (answer != null && answer.equals("true")) {
+                sendMessageToWear(INIT_LIST, message);
+            }
+        }
+
+        super.onNewIntent(intent);
+    }
+
     public void setUpViews() {
         usernameEdit = (EditText) findViewById(R.id.usernameET);
         passwordEdit = (EditText) findViewById(R.id.passwordET);

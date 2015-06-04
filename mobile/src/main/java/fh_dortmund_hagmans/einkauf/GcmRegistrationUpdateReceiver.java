@@ -1,5 +1,7 @@
 package fh_dortmund_hagmans.einkauf;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -18,7 +20,6 @@ public class GcmRegistrationUpdateReceiver extends FruityRegistrationIdUpdateRec
     @Override
     public void onRegistrationIdRenewed(String regId) {
         Log.d("tag", "GcmRegistrationUpdateReceiver > onRegistrationIdRenewed : " + regId);
-
     }
 
     @Override
