@@ -32,31 +32,33 @@ import fh_dortmund_hagmans.einkauf.models.Article;
 import fh_dortmund_hagmans.einkauf.models.Category;
 import fh_dortmund_hagmans.einkauf.models.ShoppingList;
 
+/**
+ * Main Activity, die immer auf der Wearable angezeigt wird
+ * @author Hendrik Hagmans
+ */
 public class MainActivity extends Activity implements WearableListView.ClickListener, GoogleApiClient.ConnectionCallbacks, MessageApi.MessageListener{
 
-    // Sample dataset for the list
+    // Initiales Dataset der Liste
     Article[] elements = { new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
     GoogleApiClient mApiClient;
     ShoppingListAdapter adapter;
     private static final String INIT_LIST = "/init_list";
     private static final String CHECK_ARTICLE = "/check_article";
-    private static final String SEND_USER = "/send_user";
-    private static final String LOGOUT_USER = "/logout_user";
 
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    // Get the list component from the layout of the activity
+    // Listen Komponente holen
     WearableListView listView =
             (WearableListView) findViewById(R.id.wearable_list);
 
-    // Assign an adapter to the list
+    // Adapter der Liste zuweisen
     adapter = new ShoppingListAdapter(this, elements);
     listView.setAdapter(adapter);
 
-    // Set a click listener
+    // Click Listener der Liste zuweisen
     listView.setClickListener(this);
 
 
@@ -66,6 +68,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
     mApiClient.connect();
     Wearable.MessageApi.addListener(mApiClient, this);
+    // Initiale Liste von Smartphone holen
     new Thread(new Runnable() {
         @Override
         public void run() {
@@ -78,17 +81,17 @@ protected void onCreate(Bundle savedInstanceState) {
 @Override
 public void onResume() {
         super.onResume();
-            final Article[] elements = {new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+            final Article[] elements = {new Article(getString(R.string.loading_articles), Category.FLEISCHFISCH, 0)};
             runOnUiThread(new Runnable() {
                 @Override
-                public void run() {
+                public void run() { // Status "Laden" in der Liste darstellen
                     WearableListView listView =
                             (WearableListView) findViewById(R.id.wearable_list);
-                    // Assign an adapter to the list
                     adapter.setmDataset(elements);
                     adapter.notifyDataSetChanged();
                 }
             });
+            // Aktuelle Liste von Smartphone holen
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -101,17 +104,17 @@ public void onResume() {
     @Override
     protected void onStart() {
         super.onStart();
-            final Article[] elements = {new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+            final Article[] elements = {new Article(getString(R.string.loading_articles), Category.FLEISCHFISCH, 0)};
             runOnUiThread(new Runnable() {
                 @Override
-                public void run() {
+                public void run() { // Status "Laden" in der Liste darstellen
                     WearableListView listView =
                             (WearableListView) findViewById(R.id.wearable_list);
-                    // Assign an adapter to the list
                     adapter.setmDataset(elements);
                     adapter.notifyDataSetChanged();
                 }
             });
+        // Aktuelle Liste von Smartphone holen
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -124,17 +127,17 @@ public void onResume() {
     @Override
     protected void onRestart() {
         super.onRestart();
-            final Article[] elements = {new Article("Lädt aktuelle Liste...", Category.FLEISCHFISCH, 0)};
+            final Article[] elements = {new Article(getString(R.string.loading_articles), Category.FLEISCHFISCH, 0)};
             runOnUiThread(new Runnable() {
                 @Override
-                public void run() {
+                public void run() { // Status "Laden" in der Liste darstellen
                     WearableListView listView =
                             (WearableListView) findViewById(R.id.wearable_list);
-                    // Assign an adapter to the list
                     adapter.setmDataset(elements);
                     adapter.notifyDataSetChanged();
                 }
             });
+        // Aktuelle Liste von Smartphone holen
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -144,12 +147,14 @@ public void onResume() {
 
     }
 
-// WearableListView click listener
+    /**
+     *   Click Listener der Listview
+     */
 @Override
 public void onClick(WearableListView.ViewHolder v) {
     final Integer tag = (Integer) v.itemView.getTag();
     final Integer position = (Integer) v.getPosition();
-    if (tag.equals(0)) {
+    if (tag.equals(0)) { // Kein Artikel, sondern Statuselement, daher Neuladen der Liste
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -157,6 +162,7 @@ public void onClick(WearableListView.ViewHolder v) {
             }
         }).start();
     } else {
+        // Artikel Id und checked Status auslesen
         Article[] dataset = adapter.getmDataset();
         final boolean checked = dataset[position].isChecked();
         runOnUiThread(new Runnable() {
@@ -164,16 +170,17 @@ public void onClick(WearableListView.ViewHolder v) {
             public void run() {
                 WearableListView listView =
                         (WearableListView) findViewById(R.id.wearable_list);
-                // Assign an adapter to the list
                 Article[] dataset = adapter.getmDataset();
+                // Checked Status des Artikels wechseln
                 dataset[position].toggleArticle();
+                // Neuen Checked Status in Liste anzeigen
                 adapter.setmDataset(dataset);
                 adapter.notifyDataSetChanged();
             }
         });
         new Thread(new Runnable() {
             @Override
-            public void run() {
+            public void run() { // Checken des Artikels an Smartphone senden
                 sendMessage(CHECK_ARTICLE, tag.toString() + "," + checked);
             }
         }).start();
@@ -201,8 +208,7 @@ public void onTopEmptyRegionClick() {
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        Log.v("TEST", "Message Received");
-        if( messageEvent.getPath().equalsIgnoreCase( INIT_LIST ) ) {
+        if( messageEvent.getPath().equalsIgnoreCase( INIT_LIST ) ) { // Aktuelle Liste empfangen
             byte[] payload = messageEvent.getData();
             String jsonString = new String(payload);
             Article[] articleArray = null;
@@ -211,28 +217,33 @@ public void onTopEmptyRegionClick() {
             JsonNode json = null;
             try {
                 articleArray = mapper.readValue(jsonString, Article[].class);
-            } catch (IOException e) {
+            } catch (IOException e) { // Wenn der Server keine (weil es keine gibt) oder keine valide Liste (warum auch immer) zurück gibt
                 articleArray = new Article[1];
-                articleArray[0] = new Article("Keine aktuelle Liste vorhanden. Klicken um nochmal zu laden.", Category.FLEISCHFISCH, 0);
+                articleArray[0] = new Article(getString(R.string.no_current_list), Category.FLEISCHFISCH, 0);
             }
 
             final Article[] viewArray = articleArray;
             runOnUiThread(new Runnable() {
                 @Override
-                public void run() {
+                public void run() { // Neue Artikelliste auf Wearable darstellen
                     WearableListView listView =
                             (WearableListView) findViewById(R.id.wearable_list);
-                    // Assign an adapter to the list
                     adapter.setmDataset(viewArray);
                     adapter.notifyDataSetChanged();
                 }
             });
 
+            // Kurz vibrieren um dem Nutzer auf die neue Liste aufmerksam zu machen
             Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
             vibrator.vibrate(100);
         }
     }
 
+    /**
+     * Sendet eine Nachricht an die Smartphone App
+     * @param message
+     * @param payload
+     */
     private void sendMessage(String message, String payload) {
         mApiClient.blockingConnect(100, TimeUnit.MILLISECONDS);
         NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes( mApiClient ).await();

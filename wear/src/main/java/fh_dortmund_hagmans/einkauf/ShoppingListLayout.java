@@ -8,13 +8,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-/**
- * Created by hendrikh on 17.04.15.
+/** Beschreibt das Layout eines Listitems
+ * @author Hendrik Hagmans
  */
 public class ShoppingListLayout extends LinearLayout
         implements WearableListView.OnCenterProximityListener {
 
+    // Kreis, der neben dem Artikelnamen angezeigt wird
     private ImageView mCircle;
+    // Name des Artikels
     private TextView mName;
 
     private final float mFadedTextAlpha;
@@ -39,12 +41,9 @@ public class ShoppingListLayout extends LinearLayout
         mChosenCircleColor = getResources().getColor(R.color.wl_blue);
     }
 
-    // Get references to the icon and text in the item layout definition
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        // These are defined in the layout file for list items
-        // (see next section)
         mCircle = (ImageView) findViewById(R.id.circle);
         mName = (TextView) findViewById(R.id.name);
     }

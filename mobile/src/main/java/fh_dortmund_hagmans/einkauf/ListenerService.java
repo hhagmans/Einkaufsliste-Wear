@@ -31,8 +31,8 @@ import fh_dortmund_hagmans.einkauf.models.Article;
 import fh_dortmund_hagmans.einkauf.models.Category;
 import fh_dortmund_hagmans.einkauf.models.User;
 
-/**
- * Created by hendrikh on 24.04.15.
+/** Service, der auf Nachrichten von der Wearable hört und Antworten zurück schickt
+ * @author Hendrik Hagmans
  */
 public class ListenerService extends WearableListenerService implements GoogleApiClient.ConnectionCallbacks{
 
@@ -42,18 +42,18 @@ public class ListenerService extends WearableListenerService implements GoogleAp
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        Log.v("TESTMOBILE", "Message Received");
-        if( messageEvent.getPath().equalsIgnoreCase( INIT_LIST ) ) {
+        if( messageEvent.getPath().equalsIgnoreCase( INIT_LIST ) ) { // Artikelliste auf Wearable aktualisieren
             String nodeId = messageEvent.getSourceNodeId();
 
             SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
             String username = settings.getString("username", null);
             String password = settings.getString("password", null);
 
-            if (username != null) {
+            if (username != null) { // Prüfen ob Nutzer auf Smartphone angemeldet ist
 
                 String answer = null;
                 URL url = null;
+                // Prüfen ob Anmeldung auf Smartphone korrekt
                 try {
                     url = new URL(getString(R.string.server_url) + "login&name=" + username + "&password=" + password + "/check");
                 } catch (MalformedURLException e) {
@@ -70,14 +70,14 @@ public class ListenerService extends WearableListenerService implements GoogleAp
                 }
 
 
-                if (answer == null || answer.equals("true") == false) {
+                if (answer == null || answer.equals("true") == false) { // Anmeldung auf Smartphone falsch
                     SharedPreferences.Editor editor = settings.edit();
                     editor.remove("username");
                     editor.remove("password");
 
                     editor.commit();
 
-                    Article[] elements = {new Article("Bitte erst auf Smartphone anmelden", Category.FLEISCHFISCH, 0)};
+                    Article[] elements = {new Article(getString(R.string.please_login), Category.FLEISCHFISCH, 0)};
                     ObjectMapper mapper = new ObjectMapper();
                     String json = "";
                     try {
@@ -90,7 +90,7 @@ public class ListenerService extends WearableListenerService implements GoogleAp
 
                     String inputLine = "";
                     String json = "";
-                    try {
+                    try { // Aktuelle Liste des Users holen
                         url = new URL(getString(R.string.server_url) + "shoppingList/current/json&username=" + username + "&password=" + password);
 
                         in = new BufferedReader(
@@ -105,8 +105,8 @@ public class ListenerService extends WearableListenerService implements GoogleAp
 
                     sendMessage(INIT_LIST, json);
                 }
-            } else {
-                Article[] elements = {new Article("Bitte erst auf Smartphone anmelden", Category.FLEISCHFISCH, 0)};
+            } else { // Nutzer ist nicht auf Smartphone angemeldet
+                Article[] elements = {new Article(getString(R.string.please_login), Category.FLEISCHFISCH, 0)};
                 ObjectMapper mapper = new ObjectMapper();
                 String json = "";
                 try {
@@ -116,7 +116,7 @@ public class ListenerService extends WearableListenerService implements GoogleAp
                 }
                 sendMessage(INIT_LIST, json);
             }
-        } else if (messageEvent.getPath().equalsIgnoreCase( CHECK_ARTICLE )) {
+        } else if (messageEvent.getPath().equalsIgnoreCase( CHECK_ARTICLE )) { // Artikel, der auf Wearbale geklickt wurde, aktualisieren
             String payload = new String(messageEvent.getData());
             Log.v("TEST", payload);
             String[] splitPayload = payload.split(",");
@@ -127,10 +127,10 @@ public class ListenerService extends WearableListenerService implements GoogleAp
             String username = settings.getString("username", null);
             String password = settings.getString("password", null);
 
-            if (username != null) {
+            if (username != null) { // Prüfen ob Nutzer auf Smartphone angemeldet ist
                 String answer = null;
                 URL url = null;
-                try {
+                try { // Prüfen ob Anmeldung auf Smartphone korrekt
                     url = new URL(getString(R.string.server_url) + "login&name=" + username + "&password=" + password + "/check");
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
@@ -146,14 +146,14 @@ public class ListenerService extends WearableListenerService implements GoogleAp
                 }
 
 
-                if (answer == null || answer.equals("true") == false) {
+                if (answer == null || answer.equals("true") == false) { // Anmeldung auf Smartphone falsch
                 SharedPreferences.Editor editor = settings.edit();
                 editor.remove("username");
                 editor.remove("password");
 
                 editor.commit();
 
-                Article[] elements = {new Article("Bitte erst auf Smartphone anmelden", Category.FLEISCHFISCH, 0)};
+                Article[] elements = {new Article(getString(R.string.please_login), Category.FLEISCHFISCH, 0)};
                 ObjectMapper mapper = new ObjectMapper();
                 String json = "";
                 try {
@@ -164,9 +164,9 @@ public class ListenerService extends WearableListenerService implements GoogleAp
                 sendMessage(INIT_LIST, json);
             } else {
                 try {
-                    if (checked) {
+                    if (checked) { // Artikel bisher gecheckt, daher jetzt unchecken
                         url = new URL(getString(R.string.server_url) + "article&id=" + id + "/uncheck&username=" + username + "&password=" + password);
-                    } else {
+                    } else { // Artikel bisher ungecheckt, daher jetzt checken
                         url = new URL(getString(R.string.server_url) + "article&id=" + id + "/check&username=" + username + "&password=" + password);
                     }
                     in = new BufferedReader(
@@ -186,16 +186,19 @@ public class ListenerService extends WearableListenerService implements GoogleAp
         }
     }
 
+    /**
+     * Sendet eine Nachricht an die Wearable
+     * @param path
+     * @param message
+     */
     private void sendMessage(String path, String message) {
         Log.v("TESTMOBILE", "Try sending message");
-        Log.v("TESTMOBILE", message);
         GoogleApiClient client = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .build();
         client.blockingConnect(100, TimeUnit.MILLISECONDS);
         NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes( client ).await();
         for(Node node : nodes.getNodes()) {
-            Log.v("TESTMOBILE", node.getDisplayName());
             Wearable.MessageApi.sendMessage(client, node.getId(), path, message.getBytes());
         }
         client.disconnect();

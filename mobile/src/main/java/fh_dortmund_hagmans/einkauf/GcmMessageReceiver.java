@@ -13,8 +13,8 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-/**
- * Created by hendrikh on 01.06.15.
+/** Receiver, der GCM Nachrichten vom Server empfängt
+ * @author Hendrik Hagmans
  */
 public class GcmMessageReceiver extends BroadcastReceiver{
 
@@ -25,6 +25,7 @@ public class GcmMessageReceiver extends BroadcastReceiver{
 
         Log.d("tag", "GcmMessageReceiver > onReceive: " + message);
 
+        // Nachricht an MainActivity zum Verschicken an Wearable weiterleiten
         Intent intent2open = new Intent(context, MainActivity.class);
         intent2open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent2open.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

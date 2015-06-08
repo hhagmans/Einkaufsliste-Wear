@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,7 +34,9 @@ import fh_dortmund_hagmans.einkauf.models.User;
 import kr.nectarine.android.fruitygcm.FruityGcmClient;
 import kr.nectarine.android.fruitygcm.interfaces.FruityGcmListener;
 
-
+/** Main Activity, die immer auf dem Smartphone angezeigt wird
+ * @author Hendrik Hagmans
+ */
 public class MainActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks{
 
     GoogleApiClient mApiClient;
@@ -52,6 +52,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     private TextView userNameText;
     private TextView passwordText;
 
+    /**
+     * Überprüft asynchron, ob die Credentials gültig sind
+     */
     private class CheckLoginAsync extends AsyncTask<String, String, String> {
         private EditText usernameEdit;
         private EditText passwordEdit;
@@ -147,17 +150,17 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         protected void onPostExecute(String result) {
             setUpViews();
 
-            if (currentUser != null) {
+            if (currentUser != null) { // --> User angemeldet, Views unsichtbar machen
                 usernameEdit.setVisibility(View.INVISIBLE);
                 passwordEdit.setVisibility(View.INVISIBLE);
                 loginButton.setVisibility(View.INVISIBLE);
                 userNameText.setVisibility(View.INVISIBLE);
                 passwordText.setVisibility(View.INVISIBLE);
 
-                loginStatusText.setText("Eingeloggt als " + currentUser.getName());
+                loginStatusText.setText(getString(R.string.logged_in_as) + " " + currentUser.getName());
                 logoutButton.setVisibility(View.VISIBLE);
-            } else {
-                loginStatusText.setText("Falsches Passwort/Username");
+            } else { // --> User nicht angemeldet, loginStatus View anpassen
+                loginStatusText.setText(getString(R.string.wrong_password));
             }
         }
 
@@ -189,10 +192,12 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         setContentView(R.layout.activity_main);
 
+        // User Credentials laden
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         currentUserName = settings.getString("username", null);
         currentPassword = settings.getString("password", null);
         regKey = settings.getString("regKey", null);
+
         if (currentUserName != null) {
             setUpViews();
             currentUser = new User(currentUserName, currentPassword);
@@ -202,10 +207,11 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             userNameText.setVisibility(View.INVISIBLE);
             passwordText.setVisibility(View.INVISIBLE);
 
-            loginStatusText.setText("Eingeloggt als " + currentUser.getName());
+            loginStatusText.setText(getString(R.string.logged_in_as) + " " + currentUser.getName());
             logoutButton.setVisibility(View.VISIBLE);
         }
 
+        // GCM Client starten, registrieren und die regID setzen
         FruityGcmClient.start(this, getString(R.string.sender_id), new FruityGcmListener() {
             @Override
             public void onPlayServiceNotAvailable(boolean didPlayHandleError) {
@@ -241,6 +247,10 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         });
     }
 
+    /**
+     * Wird aufgerufen, wenn vom Server die Nachricht empfangen wurde, dass eine neue Liste vorhanden ist
+     * @param intent
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         Log.d("MainActivity", "onNewIntent is called!");
@@ -279,6 +289,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         super.onNewIntent(intent);
     }
 
+    /**
+     * Aktualisiere View Variablen
+     */
     public void setUpViews() {
         usernameEdit = (EditText) findViewById(R.id.usernameET);
         passwordEdit = (EditText) findViewById(R.id.passwordET);
@@ -290,13 +303,13 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     }
 
 
-    // You need to do the Play Services APK check here too.
     @Override
     protected void onResume() {
         super.onResume();
 
         setUpViews();
 
+        // User Credentials laden
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         currentUserName = settings.getString("username", null);
         currentPassword = settings.getString("password", null);
@@ -309,10 +322,11 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             userNameText.setVisibility(View.INVISIBLE);
             passwordText.setVisibility(View.INVISIBLE);
 
-            loginStatusText.setText("Eingeloggt als " + currentUser.getName());
+            loginStatusText.setText(getString(R.string.logged_in_as) + " " + currentUser.getName());
             logoutButton.setVisibility(View.VISIBLE);
         }
 
+        // GCM Client starten, registrieren und die regID setzen
         FruityGcmClient.start(this, "1047632849901", new FruityGcmListener() {
             @Override
             public void onPlayServiceNotAvailable(boolean didPlayHandleError) {
@@ -346,9 +360,12 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                 });
             }
         });
-        Log.v("TEST", FruityGcmClient.REGISTRATION_ID);
     }
 
+    /**
+     * Holt sich die eingegebenen Credentials und start den Login AsyncTask.
+     * @param view
+     */
     public void authenticateLogin(View view) {
 
         setUpViews();
@@ -366,6 +383,10 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     }
 
+    /**
+     * Loggt den Nutzer aus und setzt dementsprechend die Views wieder auf sichtbar/unsichtbar
+     * @param view
+     */
     public void logOut(View view) {
         setUpViews();
 
@@ -378,10 +399,11 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         editor.commit();
 
+        // Auf Wearable die aktuelle Liste löschen und Bitte aus Smartphone anmelden anzeigen
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Article[] elements = {new Article("Bitte erst auf Smartphone anmelden", Category.FLEISCHFISCH, 0)};
+                Article[] elements = {new Article(getString(R.string.please_login), Category.FLEISCHFISCH, 0)};
                 ObjectMapper mapper = new ObjectMapper();
                 String json = "";
                 try {
@@ -402,10 +424,14 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         passwordText.setVisibility(View.VISIBLE);
         loginButton.setVisibility(View.VISIBLE);
 
-        loginStatusText.setText("Nicht eingeloggt");
+        loginStatusText.setText(getString(R.string.not_logged_in));
         logoutButton.setVisibility(View.INVISIBLE);
     }
 
+    /**
+     * Öffnet die Register Webseite in externem Browser
+     * @param view
+     */
     public void openRegister(View view) {
         String url = null;
         url = getString(R.string.server_url) + "register";
@@ -454,6 +480,11 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mApiClient.disconnect();
     }
 
+    /**
+     * Sendet eine Nachricht an die Wearable
+     * @param path
+     * @param text
+     */
     private void sendMessageToWear(final String path, final String text) {
         new Thread( new Runnable() {
             @Override

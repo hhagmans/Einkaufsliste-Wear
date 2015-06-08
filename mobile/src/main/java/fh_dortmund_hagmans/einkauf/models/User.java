@@ -11,8 +11,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 
-/**
- * Created by hendrikh on 02.06.15.
+/** Stellt einen Nutzer des Systems dar.
+ * @author Hendrik Hagmans
  */
 public class User {
 

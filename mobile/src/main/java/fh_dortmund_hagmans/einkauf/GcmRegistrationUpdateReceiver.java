@@ -2,6 +2,8 @@ package fh_dortmund_hagmans.einkauf;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -12,8 +14,8 @@ import java.net.URL;
 
 import kr.nectarine.android.fruitygcm.receiver.FruityRegistrationIdUpdateReceiver;
 
-/**
- * Created by hendrikh on 01.06.15.
+/** Receiver, der regId Updates vom Google Server empfängt
+ * @author Hendrik Hagmans
  */
 public class GcmRegistrationUpdateReceiver extends FruityRegistrationIdUpdateReceiver {
 
@@ -25,6 +27,5 @@ public class GcmRegistrationUpdateReceiver extends FruityRegistrationIdUpdateRec
     @Override
     public void onRegistrationIdRenewFailed() {
         Log.d("tag", "GcmRegistrationUpdateReceiver > onRegistrationIdRenewFailed : failed");
-        //needs extra backoff like retry later
     }
 }

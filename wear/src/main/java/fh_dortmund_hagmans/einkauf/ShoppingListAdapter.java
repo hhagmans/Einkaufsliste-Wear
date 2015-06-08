@@ -10,62 +10,58 @@ import android.widget.TextView;
 
 import fh_dortmund_hagmans.einkauf.models.Article;
 
-/**
- * Created by hendrikh on 17.04.15.
+/** Adapter für die Listview, die die Artikel beinhaltet
+ * @author Hendrik Hagmans
  */
 public class ShoppingListAdapter extends WearableListView.Adapter {
     private Article[] mDataset;
     private final Context mContext;
     private final LayoutInflater mInflater;
 
-    // Provide a suitable constructor (depends on the kind of dataset)
     public ShoppingListAdapter(Context context, Article[] dataset) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mDataset = dataset;
     }
 
-    // Provide a reference to the type of views you're using
+    /**
+     * Klasse, die die Items der Listview beschreibt
+     */
     public static class ItemViewHolder extends WearableListView.ViewHolder {
         private TextView textView;
         public ItemViewHolder(View itemView) {
             super(itemView);
-            // find the text view within the custom item's layout
             textView = (TextView) itemView.findViewById(R.id.name);
         }
     }
 
-    // Create new views for list items
-    // (invoked by the WearableListView's layout manager)
     @Override
     public WearableListView.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                           int viewType) {
-        // Inflate our custom layout for list items
         return new ItemViewHolder(mInflater.inflate(R.layout.list_item, null));
     }
 
-    // Replace the contents of a list item
-    // Instead of creating new views, the list tries to recycle existing ones
-    // (invoked by the WearableListView's layout manager)
+    /**
+     * Ersetzt die Items in der Listview und setzt den checked Status der ViewItems
+     * @param holder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(WearableListView.ViewHolder holder,
                                  int position) {
-        // retrieve the text view
         ItemViewHolder itemHolder = (ItemViewHolder) holder;
         TextView view = itemHolder.textView;
-        // replace text contents
+        // ArtikelName in die TextView setzen
         view.setText(mDataset[position].getName());
-        // replace list item's metadata
+        // Setze die Artikel Id als Tag, um später wieder darauf zugreifen zu können
         holder.itemView.setTag(mDataset[position].getId());
-        if (mDataset[position].isChecked()) {
+        if (mDataset[position].isChecked()) { // Wenn der Artikel gechecked ist, in der View als durchgestrichen darstellen
             view.setPaintFlags(view.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        } else {
+        } else { // Nicht gechecked, daher nicht als durchgestrichen darstellen
             view.setPaintFlags(view.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
     }
 
-    // Return the size of your dataset
-    // (invoked by the WearableListView's layout manager)
     @Override
     public int getItemCount() {
         return mDataset.length;

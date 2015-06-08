@@ -3,4 +3,8 @@
 
     <string name="hello_world">Dies ist die Companion App der Wearable Einkaufsapp.</string>
     <string name="action_settings">Settings</string>
+    <string name="please_login">Bitte erst auf Smartphone anmelden</string>
+    <string name="logged_in_as">Eingeloggt als</string>
+    <string name="not_logged_in">Nicht eingeloggt</string>
+    <string name="wrong_password">Falsches Passwort/Username</string>
 </resources>

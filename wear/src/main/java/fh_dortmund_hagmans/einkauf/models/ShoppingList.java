@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by hendrikh on 24.04.15.
+/** Stellt eine ShoppingList mit Artikeln dar
+ * @author Hendrik Hagmans
  */
 public class ShoppingList {
 

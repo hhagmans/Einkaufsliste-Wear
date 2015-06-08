@@ -1,14 +1,15 @@
 package fh_dortmund_hagmans.einkauf.models;
 
-/**
- * Created by hendrikh on 24.04.15.
+/** Stellt eine Kategorie eines Artikels dar
+ * @author Hendrik Hagmans
  */
 public enum Category {
 
     FLEISCHFISCH("Fleisch und Fisch"), GEMUESEOBST("Gemüse und Obst"), KOCHENBACKEN(
             "Kochen und Backen"), MILCHPRODUKTE("Milchprodukte"), TIEFKUEHLPRODUKTE(
             "Tiefkühlprodukte"), GETRAENKE("Getränke"), SUESSIGKEITEN(
-            "Süßigkeiten"), HAUSHALT("Haushalt"), SONSTIGES("Sonstiges");
+            "Süßigkeiten"), KOERPERPFLEGE("Körperpflege"), HAUSHALT("Haushalt"), SONSTIGES(
+            "Sonstiges");
 
     private String categoryName;
 

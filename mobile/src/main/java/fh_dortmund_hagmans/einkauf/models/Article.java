@@ -1,7 +1,7 @@
 package fh_dortmund_hagmans.einkauf.models;
 
-/**
- * Created by hendrikh on 24.04.15.
+/** Stellt einen Einkaufsartikel dar
+ * @author Hendrik Hagmans
  */
 public class Article {
 
