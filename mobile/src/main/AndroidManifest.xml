@@ -10,6 +10,7 @@
     <uses-permission android:name="fh_dortmund_hagmans.einkauf.permission.C2D_MESSAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
 
     <application
