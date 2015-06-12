@@ -57,7 +57,7 @@ public class ShoppingListAdapter extends WearableListView.Adapter {
         holder.itemView.setTag(mDataset[position].getId());
         if (mDataset[position].isChecked()) { // Wenn der Artikel gechecked ist, in der View als durchgestrichen darstellen
             view.setPaintFlags(view.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        } else { // Nicht gechecked, daher nicht als durchgestrichen darstellen
+        } else { // Nicht gechecked, daher als nicht durchgestrichen darstellen. Flag muss entfernt werden für den Fall, dass es schonmal gesetzt wurde
             view.setPaintFlags(view.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
     }

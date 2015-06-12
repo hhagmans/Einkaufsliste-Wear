@@ -233,7 +233,7 @@ public void onTopEmptyRegionClick() {
                 }
             });
 
-            // Kurz vibrieren um dem Nutzer auf die neue Liste aufmerksam zu machen
+            // Kurz vibrieren um den Nutzer auf die neue Liste aufmerksam zu machen
             Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
             vibrator.vibrate(100);
         }
